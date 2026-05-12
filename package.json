@@ -1,0 +1,19 @@
+{
+  "name": "vumo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Make videos programmatically with Vue 3 — a Vue-native port of Remotion.",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "dev:hello": "pnpm --filter @vumo/example-hello-world dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
