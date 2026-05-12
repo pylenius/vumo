@@ -3,9 +3,9 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@vumo/core", "@vumo/preview", "@vumo/renderer", "@vumo/cli"]],
+  "linked": [["@vumo/core", "@vumo/preview", "@vumo/renderer", "@vumo/cli", "@vumo/skills"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@vumo/example-hello-world", "@vumo/example-sequences-demo", "@vumo/example-audio-demo", "vumo-docs", "@vumo/skills"]
+  "ignore": ["@vumo/example-hello-world", "@vumo/example-sequences-demo", "@vumo/example-audio-demo", "vumo-docs"]
 }

@@ -22,12 +22,19 @@ Each `SKILL.md` starts with YAML frontmatter (`name`, `description`, `metadata.t
 
 ## Using these skills
 
-### Claude Code
-
-Drop the contents into your project's `.claude/skills/` directory, or have your agent point at this repo directly:
+### Claude Code (npm install)
 
 ```bash
-# from the root of any project that wants vumo skills
+mkdir -p .claude/skills
+npm pack @vumo/skills | xargs -I{} tar -xzf {} -C .claude/skills --strip-components=2 package/skills/vumo
+rm vumo-skills-*.tgz
+```
+
+That drops `.claude/skills/vumo/SKILL.md` + the `rules/` directory into your project. Claude Code picks it up automatically on next launch.
+
+### Claude Code (from this repo, no npm)
+
+```bash
 mkdir -p .claude/skills
 curl -L https://github.com/pylenius/vumo/archive/refs/heads/main.tar.gz \
   | tar -xz --strip-components=4 -C .claude/skills \

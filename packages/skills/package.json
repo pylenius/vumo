@@ -1,10 +1,13 @@
 {
   "name": "@vumo/skills",
-  "version": "0.0.0",
-  "description": "Agent skill files describing best practices for working in vumo projects.",
-  "private": true,
+  "version": "0.2.0",
+  "description": "Agent skill files for vumo — best practices for AI coding agents (Claude Code, Cursor, Codex) working in vumo projects.",
   "type": "module",
   "files": ["skills"],
+  "scripts": {
+    "build": "node -e \"process.exit(0)\""
+  },
+  "keywords": ["vumo", "skills", "claude-code", "cursor", "codex", "agent-skills", "vue", "video"],
   "repository": {
     "type": "git",
     "url": "https://github.com/pylenius/vumo.git",

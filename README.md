@@ -140,7 +140,8 @@ examples/
   audio-demo/       Background tone + four staggered SFX beeps
 packages/
   skills/           Agent skill files (Claude Code / Cursor / Codex)
-                    describing vumo best practices.
+                    describing vumo best practices. Published as
+                    @vumo/skills.
 ```
 
 ## Roadmap
