@@ -17,7 +17,8 @@ program
   .option('-p, --project <path>', 'Path to project root (containing package.json)', process.cwd())
   .option('-o, --output <path>', 'Output MP4 file path', 'out.mp4')
   .option('--crf <number>', 'H.264 CRF — quality, lower is better (0-51)', '18')
-  .action(async (compositionId: string, options: { project: string; output: string; crf: string }) => {
+  .option('--workers <number>', 'Parallel render workers (default: min(cpu count, 4))')
+  .action(async (compositionId: string, options: { project: string; output: string; crf: string; workers?: string }) => {
     const projectRoot = resolve(options.project);
     const output = resolve(options.output);
     const crf = Number(options.crf);
@@ -25,6 +26,15 @@ program
     if (Number.isNaN(crf) || crf < 0 || crf > 51) {
       console.error(`[vumo] Invalid --crf "${options.crf}" — must be a number between 0 and 51.`);
       process.exit(1);
+    }
+
+    let workers: number | undefined;
+    if (options.workers !== undefined) {
+      workers = Number(options.workers);
+      if (!Number.isInteger(workers) || workers < 1 || workers > 32) {
+        console.error(`[vumo] Invalid --workers "${options.workers}" — must be an integer between 1 and 32.`);
+        process.exit(1);
+      }
     }
 
     console.log(`[vumo] rendering "${compositionId}"`);
@@ -40,6 +50,7 @@ program
         compositionId,
         output,
         crf,
+        workers,
         onProgress: ({ frame, total, stage }) => {
           if (stage === 'capture') {
             const pct = ((frame / total) * 100).toFixed(1);

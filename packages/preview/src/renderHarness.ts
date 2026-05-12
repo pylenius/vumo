@@ -1,6 +1,11 @@
 import { createApp, h, ref, type App } from 'vue';
 import { FrameKey, VideoConfigKey } from '@vumo/core/internals';
-import { listCompositions, getComposition, type CompositionDefinition } from '@vumo/core';
+import {
+  listCompositions,
+  getComposition,
+  getPendingRenderHandles,
+  type CompositionDefinition,
+} from '@vumo/core';
 
 export interface CompositionInfo {
   id: string;
@@ -15,7 +20,8 @@ declare global {
     __vumoListCompositions?: () => CompositionInfo[];
     __vumoSelectComposition?: (id: string) => void;
     __vumoSetFrame?: (n: number) => void;
-    __vumoReadyForCapture?: () => Promise<boolean>;
+    __vumoReadyForCapture?: () => boolean;
+    __vumoPendingHandles?: () => string[];
   }
 }
 
@@ -88,10 +94,12 @@ export function setupRenderHarness(selector: string): void {
     frame.value = clamped;
   };
 
-  window.__vumoReadyForCapture = async (): Promise<boolean> => {
-    await document.fonts.ready;
-    await new Promise<void>((r) => requestAnimationFrame(() => r()));
-    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+  window.__vumoReadyForCapture = (): boolean => {
+    if (document.fonts.status === 'loading') return false;
+    if (getPendingRenderHandles().length > 0) return false;
     return true;
   };
+
+  window.__vumoPendingHandles = (): string[] =>
+    getPendingRenderHandles().map((h) => h.label);
 }
