@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [["@vumo/core", "@vumo/preview", "@vumo/renderer", "@vumo/cli"]],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@vumo/example-hello-world", "@vumo/example-sequences-demo", "@vumo/example-audio-demo", "vumo-docs"]
+}

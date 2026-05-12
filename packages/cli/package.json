@@ -1,7 +1,7 @@
 {
   "name": "@vumo/cli",
-  "version": "0.0.1",
-  "description": "Command-line interface for vumo: dev preview and MP4 render.",
+  "version": "0.1.0",
+  "description": "Command-line interface for vumo: `vumo render` produces MP4 from a Vue composition.",
   "type": "module",
   "bin": {
     "vumo": "./dist/cli.js"
@@ -23,5 +23,12 @@
     "@types/node": "^22.10.0",
     "typescript": "^5.6.3",
     "vite": "^6.0.5"
-  }
+  },
+  "keywords": ["vue", "video", "remotion", "vumo", "cli"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pylenius/vumo.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT"
 }

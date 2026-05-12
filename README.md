@@ -2,7 +2,7 @@
 
 Make videos programmatically with Vue 3 — a Vue-native port of [Remotion](https://www.remotion.dev/).
 
-> **Status:** pre-release. Phase 1–3 complete: primitives, scrubber preview, headless renderer, sequence + delayRender, parallel worker pool. Audio and docs are next.
+> **Status:** `0.1.0` candidate. Vue primitives, scrubber preview, headless renderer with worker pool, `<Sequence>`, `<Audio>`, `delayRender`, tests, CI, and a [docs site](https://pylenius.github.io/vumo/) are in. Not yet published to npm.
 
 ## Quick start
 
@@ -146,7 +146,14 @@ examples/
 - [x] **Phase 2** — Puppeteer + FFmpeg → MP4
 - [x] **Phase 3** — `<Sequence>`, `delayRender`, worker pool
 - [x] **Phase 4** — `<Audio>` + audio mux
-- [ ] **Phase 5** — Docs site (VitePress), first OSS release (`0.1.0`)
+- [x] **Phase 5** — Docs, Vitest suite, GitHub Actions CI, Changesets
+
+### Up for `0.2.0`
+
+- Production-bundle render path (skip Vite dev server → real worker-count scaling)
+- `<Video>` for embedded clips
+- Sequence-aware `<Audio>` (auto-shift `from` by parent Sequence offset)
+- `interpolate` / `spring` animation helpers
 
 ## Acknowledgements
 
@@ -154,4 +161,4 @@ Heavily inspired by [Remotion](https://www.remotion.dev/) — the React framewor
 
 ## License
 
-MIT (planned — not yet published).
+[MIT](./LICENSE).

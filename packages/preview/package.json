@@ -1,7 +1,7 @@
 {
   "name": "@vumo/preview",
-  "version": "0.0.1",
-  "description": "In-browser scrubber preview for vumo compositions.",
+  "version": "0.1.0",
+  "description": "In-browser scrubber preview + headless render harness for vumo compositions.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -11,8 +11,19 @@
       "import": "./src/index.ts"
     }
   },
-  "files": ["src"],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "files": ["dist", "src"],
   "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
     "typecheck": "vue-tsc --noEmit"
   },
   "peerDependencies": {
@@ -22,8 +33,18 @@
     "@vumo/core": "workspace:*"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.5",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
     "vue": "^3.5.13",
-    "vue-tsc": "^2.1.10",
-    "typescript": "^5.6.3"
-  }
+    "vue-tsc": "^2.1.10"
+  },
+  "keywords": ["vue", "video", "remotion", "vumo"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pylenius/vumo.git",
+    "directory": "packages/preview"
+  },
+  "license": "MIT"
 }
