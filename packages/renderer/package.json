@@ -1,0 +1,32 @@
+{
+  "name": "@vumo/renderer",
+  "version": "0.0.1",
+  "description": "Headless Chromium + FFmpeg render pipeline for vumo compositions.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@vumo/core": "workspace:*",
+    "ffmpeg-static": "^5.2.0",
+    "puppeteer": "^23.10.0"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.5"
+  }
+}

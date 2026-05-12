@@ -1,0 +1,27 @@
+{
+  "name": "@vumo/cli",
+  "version": "0.0.1",
+  "description": "Command-line interface for vumo: dev preview and MP4 render.",
+  "type": "module",
+  "bin": {
+    "vumo": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@vumo/renderer": "workspace:*",
+    "commander": "^12.1.0"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.5"
+  }
+}
