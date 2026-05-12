@@ -3,12 +3,19 @@ import { tmpdir, cpus } from 'node:os';
 import { join, resolve } from 'node:path';
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 import { createServer, type ViteDevServer } from 'vite';
-import { encodeH264 } from './ffmpeg.js';
+import { encode } from './ffmpeg.js';
+import {
+  downloadAudio,
+  mergeCuesFromWorkers,
+  resolveAudioUrl,
+  type AudioCue,
+  type PreparedCue,
+} from './audio.js';
 
 export interface RenderProgress {
   frame: number;
   total: number;
-  stage: 'capture' | 'encode';
+  stage: 'capture' | 'audio' | 'encode';
 }
 
 export interface RenderOptions {
@@ -71,12 +78,12 @@ async function startDevServer(projectRoot: string): Promise<ViteDevServer> {
   return server;
 }
 
-function getServerUrl(server: ViteDevServer): string {
+function getServerOrigin(server: ViteDevServer): string {
   const address = server.httpServer?.address();
   if (!address || typeof address === 'string') {
     throw new Error('[vumo] Failed to determine dev server address.');
   }
-  return `http://127.0.0.1:${address.port}/?vumoRender=1`;
+  return `http://127.0.0.1:${address.port}`;
 }
 
 async function preparePage(
@@ -112,27 +119,48 @@ async function captureFrame(
   width: number,
   height: number,
 ): Promise<Buffer> {
-  // Set frame + flush Vue's microtask queue twice so the reactive update lands.
   await page.evaluate(
     async ({ f, ms }: { f: number; ms: number }) => {
       window.__vumoReseed?.(f);
       window.__vumoTimeMs = ms;
       window.__vumoSetFrame!(f);
-      // Two microtask boundaries — Vue 3's scheduler is microtask-based.
       await Promise.resolve();
       await Promise.resolve();
     },
     { f: frame, ms: (frame * 1000) / fps },
   );
-  await page.waitForFunction('window.__vumoReadyForCapture && window.__vumoReadyForCapture()', {
-    timeout: 30_000,
-    polling: 16,
-  });
+  await page.waitForFunction(
+    'window.__vumoReadyForCapture && window.__vumoReadyForCapture()',
+    { timeout: 30_000, polling: 16 },
+  );
   return (await page.screenshot({
     type: 'png',
     omitBackground: false,
     clip: { x: 0, y: 0, width, height, scale: 1 },
   })) as Buffer;
+}
+
+async function collectAudioCues(pages: Page[]): Promise<AudioCue[]> {
+  const perWorker = await Promise.all(
+    pages.map((p) => p.evaluate(() => window.__vumoListAudioCues?.() ?? [])),
+  );
+  return mergeCuesFromWorkers(perWorker as AudioCue[][]);
+}
+
+async function prepareAudioCues(
+  cues: AudioCue[],
+  serverOrigin: string,
+  outDir: string,
+): Promise<PreparedCue[]> {
+  return Promise.all(
+    cues.map(async (cue, idx) => {
+      const url = resolveAudioUrl(cue.src, `${serverOrigin}/`);
+      const ext = url.split('?')[0]!.split('.').pop() || 'audio';
+      const file = join(outDir, `cue-${idx}-${cue.id}.${ext}`);
+      await downloadAudio(url, file);
+      return { cue, file };
+    }),
+  );
 }
 
 export async function render(opts: RenderOptions): Promise<void> {
@@ -144,10 +172,12 @@ export async function render(opts: RenderOptions): Promise<void> {
   let server: ViteDevServer | null = null;
   let browser: Browser | null = null;
   let framesDir: string | null = null;
+  let audioDir: string | null = null;
 
   try {
     server = await startDevServer(projectRoot);
-    const url = getServerUrl(server);
+    const serverOrigin = getServerOrigin(server);
+    const renderUrl = `${serverOrigin}/?vumoRender=1`;
 
     browser = await puppeteer.launch({
       headless: true,
@@ -164,7 +194,7 @@ export async function render(opts: RenderOptions): Promise<void> {
 
     // Probe — discover registered compositions
     const probe = await browser.newPage();
-    await probe.goto(url, { waitUntil: 'networkidle0', timeout: 60_000 });
+    await probe.goto(renderUrl, { waitUntil: 'networkidle0', timeout: 60_000 });
     await probe.waitForFunction('typeof window.__vumoListCompositions === "function"', {
       timeout: 30_000,
     });
@@ -178,20 +208,15 @@ export async function render(opts: RenderOptions): Promise<void> {
     }
     await probe.close();
 
-    // Spawn worker pages
     const effectiveWorkers = Math.min(workers, comp.durationInFrames);
     const pages = await Promise.all(
-      Array.from({ length: effectiveWorkers }, () => preparePage(browser!, url, comp)),
+      Array.from({ length: effectiveWorkers }, () => preparePage(browser!, renderUrl, comp)),
     );
 
     framesDir = await mkdtemp(join(tmpdir(), 'vumo-frames-'));
 
     let completed = 0;
     const total = comp.durationInFrames;
-    const reportProgress = (): void => {
-      completed += 1;
-      opts.onProgress?.({ frame: completed, total, stage: 'capture' });
-    };
 
     await Promise.all(
       pages.map(async (page, workerIdx) => {
@@ -199,25 +224,40 @@ export async function render(opts: RenderOptions): Promise<void> {
           const buf = await captureFrame(page, f, comp.fps, comp.width, comp.height);
           const padded = String(f).padStart(6, '0');
           await writeFile(join(framesDir!, `frame-${padded}.png`), buf);
-          reportProgress();
+          completed += 1;
+          opts.onProgress?.({ frame: completed, total, stage: 'capture' });
         }
       }),
     );
 
+    // Audio cue collection happens AFTER capture so every Sequence-mounted
+    // <Audio> has had a chance to register. Each worker page's registry is
+    // queried and the union is taken.
+    const cues = await collectAudioCues(pages);
+
+    let preparedCues: PreparedCue[] = [];
+    if (cues.length > 0) {
+      opts.onProgress?.({ frame: 0, total: cues.length, stage: 'audio' });
+      audioDir = await mkdtemp(join(tmpdir(), 'vumo-audio-'));
+      preparedCues = await prepareAudioCues(cues, serverOrigin, audioDir);
+    }
+
     await Promise.all(pages.map((p) => p.close().catch(() => undefined)));
 
     opts.onProgress?.({ frame: 0, total, stage: 'encode' });
-    await encodeH264({
+    await encode({
       framesDir,
-      pattern: 'frame-%06d.png',
+      framesPattern: 'frame-%06d.png',
       fps: comp.fps,
+      videoCrf: crf,
+      audioCues: preparedCues,
       output,
-      crf,
     });
   } finally {
     if (browser) await browser.close().catch(() => undefined);
     if (server) await server.close().catch(() => undefined);
     if (framesDir) await rm(framesDir, { recursive: true, force: true }).catch(() => undefined);
+    if (audioDir) await rm(audioDir, { recursive: true, force: true }).catch(() => undefined);
   }
 }
 
@@ -230,5 +270,6 @@ declare global {
     __vumoSetFrame?: (n: number) => void;
     __vumoReadyForCapture?: () => boolean;
     __vumoPendingHandles?: () => string[];
+    __vumoListAudioCues?: () => AudioCue[];
   }
 }

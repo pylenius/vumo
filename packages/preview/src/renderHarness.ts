@@ -4,6 +4,8 @@ import {
   listCompositions,
   getComposition,
   getPendingRenderHandles,
+  listAudioCues,
+  type AudioCue,
   type CompositionDefinition,
 } from '@vumo/core';
 
@@ -22,6 +24,7 @@ declare global {
     __vumoSetFrame?: (n: number) => void;
     __vumoReadyForCapture?: () => boolean;
     __vumoPendingHandles?: () => string[];
+    __vumoListAudioCues?: () => readonly AudioCue[];
   }
 }
 
@@ -102,4 +105,6 @@ export function setupRenderHarness(selector: string): void {
 
   window.__vumoPendingHandles = (): string[] =>
     getPendingRenderHandles().map((h) => h.label);
+
+  window.__vumoListAudioCues = (): readonly AudioCue[] => listAudioCues();
 }

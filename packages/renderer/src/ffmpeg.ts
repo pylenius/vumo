@@ -1,10 +1,10 @@
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { buildFfmpegArgs, type MuxOptions } from './audio.js';
 
 const require = createRequire(import.meta.url);
 
-function resolveFfmpegPath(): string {
+export function resolveFfmpegPath(): string {
   if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
   const resolved = require('ffmpeg-static') as string | null;
   if (!resolved) {
@@ -15,35 +15,10 @@ function resolveFfmpegPath(): string {
   return resolved;
 }
 
-export interface EncodeOptions {
-  framesDir: string;
-  pattern: string;
-  fps: number;
-  output: string;
-  crf: number;
-}
-
-export function encodeH264(opts: EncodeOptions): Promise<void> {
+export function encode(opts: MuxOptions): Promise<void> {
   return new Promise((resolve, reject) => {
     const ffmpeg = resolveFfmpegPath();
-    const args = [
-      '-y',
-      '-framerate',
-      String(opts.fps),
-      '-i',
-      join(opts.framesDir, opts.pattern),
-      '-c:v',
-      'libx264',
-      '-pix_fmt',
-      'yuv420p',
-      '-crf',
-      String(opts.crf),
-      '-preset',
-      'medium',
-      '-movflags',
-      '+faststart',
-      opts.output,
-    ];
+    const args = buildFfmpegArgs(opts);
     const proc = spawn(ffmpeg, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
     });

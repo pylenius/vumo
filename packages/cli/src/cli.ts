@@ -56,6 +56,10 @@ program
             const pct = ((frame / total) * 100).toFixed(1);
             lastLine = `[vumo] capture ${frame}/${total} (${pct}%)`;
             process.stdout.write(`\r${lastLine}`);
+          } else if (stage === 'audio') {
+            if (lastLine) process.stdout.write('\n');
+            process.stdout.write(`[vumo] preparing ${total} audio cue${total === 1 ? '' : 's'}…\n`);
+            lastLine = '';
           } else if (stage === 'encode') {
             if (lastLine) process.stdout.write('\n');
             process.stdout.write('[vumo] encoding video…\n');

@@ -15,4 +15,13 @@ export {
   type DelayRenderHandle,
 } from './delayRender.js';
 export { default as Sequence } from './Sequence.vue';
+export { default as Audio } from './Audio.vue';
+export {
+  registerAudioCue,
+  listAudioCues,
+  getAudioCuesRef,
+  clearAudioCues,
+  type AudioCue,
+  type AudioCueInput,
+} from './internals/audioRegistry.js';
 export type { VideoConfig } from './internals/index.js';

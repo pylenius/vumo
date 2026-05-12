@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, provide, onMounted, onUnmounted, watchEffect, type Component } from 'vue';
+import { ref, provide, onMounted, onUnmounted, watch, watchEffect, type Component } from 'vue';
 import { FrameKey, VideoConfigKey } from '@vumo/core/internals';
+import { getAudioCuesRef, type AudioCue } from '@vumo/core';
 import Scrubber from './components/Scrubber.vue';
 import Controls from './components/Controls.vue';
 
@@ -81,6 +82,63 @@ function onKey(e: KeyboardEvent) {
   else if (e.key === 'k' || e.key === 'K') togglePlay();
 }
 
+// --- Audio playback for preview (best-effort sync) ---
+const cuesRef = getAudioCuesRef();
+const audioElements = new Map<number, HTMLAudioElement>();
+
+function pauseAllAudio() {
+  for (const el of audioElements.values()) {
+    if (!el.paused) el.pause();
+  }
+}
+
+function disposeAudio(id: number) {
+  const el = audioElements.get(id);
+  if (el) {
+    el.pause();
+    el.src = '';
+    audioElements.delete(id);
+  }
+}
+
+function ensureAudioElement(cue: AudioCue): HTMLAudioElement {
+  let el = audioElements.get(cue.id);
+  if (!el) {
+    el = new Audio(cue.src);
+    el.volume = cue.volume;
+    el.loop = cue.loop;
+    el.preload = 'auto';
+    audioElements.set(cue.id, el);
+  }
+  return el;
+}
+
+function syncAudioForFrame(f: number, isPlaying: boolean) {
+  for (const cue of cuesRef.value) {
+    const el = ensureAudioElement(cue);
+    const inWindow = f >= cue.from && f < cue.from + cue.durationInFrames;
+    if (inWindow && isPlaying) {
+      const targetTime = (f - cue.from + cue.startOffset) / props.fps;
+      if (!cue.loop && Math.abs(el.currentTime - targetTime) > 0.12) {
+        el.currentTime = targetTime;
+      }
+      if (el.paused) el.play().catch(() => undefined);
+    } else if (!el.paused) {
+      el.pause();
+    }
+  }
+}
+
+watch([frame, playing], ([f, isPlaying]) => syncAudioForFrame(f, isPlaying));
+
+watch(cuesRef, (newCues, oldCues) => {
+  const newIds = new Set(newCues.map((c) => c.id));
+  for (const old of oldCues ?? []) {
+    if (!newIds.has(old.id)) disposeAudio(old.id);
+  }
+  syncAudioForFrame(frame.value, playing.value);
+});
+
 onMounted(() => {
   window.addEventListener('keydown', onKey);
   window.addEventListener('resize', updateScale);
@@ -91,6 +149,8 @@ onUnmounted(() => {
   window.removeEventListener('keydown', onKey);
   window.removeEventListener('resize', updateScale);
   if (rafId !== null) cancelAnimationFrame(rafId);
+  pauseAllAudio();
+  for (const id of Array.from(audioElements.keys())) disposeAudio(id);
 });
 
 watchEffect(() => {

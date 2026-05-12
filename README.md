@@ -70,6 +70,22 @@ import { Sequence } from '@vumo/core';
 
 Inside each `<Sequence>`, `useCurrentFrame()` returns a frame relative to that sequence's `from`. Children only mount while `from <= globalFrame < from + durationInFrames`.
 
+### `<Audio>` — declarative audio cues
+
+```vue
+<script setup lang="ts">
+import { Audio } from '@vumo/core';
+</script>
+
+<template>
+  <Audio src="/bg.wav"     :from="0"   :duration-in-frames="180" :volume="0.4" />
+  <Audio src="/beep-a.wav" :from="30"  :duration-in-frames="6"   :volume="0.9" />
+  <Audio src="/beep-b.wav" :from="90"  :duration-in-frames="6"   :volume="0.9" />
+</template>
+```
+
+`<Audio>` renders nothing visible — it registers an audio cue (src + global frame window + volume + optional loop/startOffset) into a per-page registry. The scrubber preview drives HTML5 `<audio>` elements that sync to the frame timer. The renderer collects cues from every worker page after capture, downloads each source from the dev server, and muxes them into the MP4 via FFmpeg's `adelay` + `amix` filters.
+
 ### `delayRender` / `continueRender` — async asset gate
 
 ```ts
@@ -121,6 +137,7 @@ packages/
 examples/
   hello-world/      Single composition, rotating pulsing square
   sequences-demo/   Three Sequence clips + delayRender
+  audio-demo/       Background tone + four staggered SFX beeps
 ```
 
 ## Roadmap
@@ -128,7 +145,7 @@ examples/
 - [x] **Phase 1** — Vue primitives + scrubber preview
 - [x] **Phase 2** — Puppeteer + FFmpeg → MP4
 - [x] **Phase 3** — `<Sequence>`, `delayRender`, worker pool
-- [ ] **Phase 4** — `<Audio>` + audio mux
+- [x] **Phase 4** — `<Audio>` + audio mux
 - [ ] **Phase 5** — Docs site (VitePress), first OSS release (`0.1.0`)
 
 ## Acknowledgements
