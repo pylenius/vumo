@@ -1,6 +1,6 @@
 {
   "name": "@vumo/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vue primitives for vumo: useCurrentFrame, useVideoConfig, defineComposition, Sequence, Audio, delayRender.",
   "type": "module",
   "main": "./src/index.ts",
@@ -29,7 +29,10 @@
       }
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "vite build && vue-tsc -p tsconfig.build.json",
     "typecheck": "vue-tsc --noEmit",
@@ -48,7 +51,13 @@
     "vue": "^3.5.13",
     "vue-tsc": "^2.1.10"
   },
-  "keywords": ["vue", "video", "remotion", "programmatic-video", "vumo"],
+  "keywords": [
+    "vue",
+    "video",
+    "remotion",
+    "programmatic-video",
+    "vumo"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pylenius/vumo.git",
