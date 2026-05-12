@@ -1,6 +1,6 @@
 {
   "name": "@vumo/renderer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Headless Chromium + FFmpeg render pipeline for vumo compositions.",
   "type": "module",
   "main": "./dist/index.js",
@@ -11,7 +11,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -31,7 +33,14 @@
     "vite": "^6.0.5",
     "vitest": "^2.1.8"
   },
-  "keywords": ["vue", "video", "remotion", "vumo", "puppeteer", "ffmpeg"],
+  "keywords": [
+    "vue",
+    "video",
+    "remotion",
+    "vumo",
+    "puppeteer",
+    "ffmpeg"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pylenius/vumo.git",

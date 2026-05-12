@@ -1,6 +1,6 @@
 {
   "name": "@vumo/preview",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "In-browser scrubber preview + headless render harness for vumo compositions.",
   "type": "module",
   "main": "./src/index.ts",
@@ -21,7 +21,10 @@
       }
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "vite build && vue-tsc -p tsconfig.build.json",
     "typecheck": "vue-tsc --noEmit"
@@ -40,7 +43,12 @@
     "vue": "^3.5.13",
     "vue-tsc": "^2.1.10"
   },
-  "keywords": ["vue", "video", "remotion", "vumo"],
+  "keywords": [
+    "vue",
+    "video",
+    "remotion",
+    "vumo"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pylenius/vumo.git",
