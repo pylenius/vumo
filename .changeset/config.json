@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@vumo/example-hello-world", "@vumo/example-sequences-demo", "@vumo/example-audio-demo", "vumo-docs"]
+  "ignore": ["@vumo/example-hello-world", "@vumo/example-sequences-demo", "@vumo/example-audio-demo", "vumo-docs", "@vumo/skills"]
 }

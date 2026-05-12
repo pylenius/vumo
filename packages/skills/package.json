@@ -1,0 +1,14 @@
+{
+  "name": "@vumo/skills",
+  "version": "0.0.0",
+  "description": "Agent skill files describing best practices for working in vumo projects.",
+  "private": true,
+  "type": "module",
+  "files": ["skills"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pylenius/vumo.git",
+    "directory": "packages/skills"
+  },
+  "license": "MIT"
+}

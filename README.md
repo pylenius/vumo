@@ -138,6 +138,9 @@ examples/
   hello-world/      Single composition, rotating pulsing square
   sequences-demo/   Three Sequence clips + delayRender
   audio-demo/       Background tone + four staggered SFX beeps
+packages/
+  skills/           Agent skill files (Claude Code / Cursor / Codex)
+                    describing vumo best practices.
 ```
 
 ## Roadmap
