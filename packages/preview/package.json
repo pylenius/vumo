@@ -1,6 +1,6 @@
 {
   "name": "@vumo/preview",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "In-browser scrubber preview + headless render harness for vumo compositions.",
   "type": "module",
   "main": "./src/index.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@vumo/renderer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Headless Chromium + FFmpeg render pipeline for vumo compositions.",
   "type": "module",
   "main": "./dist/index.js",
